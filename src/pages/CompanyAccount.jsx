@@ -3,10 +3,14 @@ import { useParams } from "react-router-dom";
 import AuthHandler from "../utils/Authhandler";
 import APIHandler from "../utils/APIHandler";
 import { toast } from "react-hot-toast";
+import Pagination from "../utils/Pagination";
+import usePagination from "../Hooks/usePagination";
 
 const CompanyAccount = () => {
+
   const { id } = useParams();
   const apiHandler = APIHandler();
+  const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
     company_id: "",
     transaction_type: "",
@@ -17,6 +21,8 @@ const CompanyAccount = () => {
 
   const [companyAccountData, setCompanyAccountData] = useState([]);
   const [companyList, setCompanyData] = useState([]);
+
+//---------------------- Fetch Company Account Data ----------------------//
 
   useEffect(() => {
     AuthHandler.checkTokenExpiry();
@@ -29,12 +35,13 @@ const CompanyAccount = () => {
     updateDataAgain();
   };
 
+//---------------------- Update Company Account Data ----------------------//
+
   const updateDataAgain = async () => {
     const companyAccountData = await apiHandler.fetchAllCompanyAccount();
     // console.log("Company Account Data", companyAccountData.data.data);
     setCompanyAccountData(companyAccountData.data.data);
   };
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -59,7 +66,10 @@ const CompanyAccount = () => {
 
       // Check for error in the response
       if (response.data.error) {
-        console.log("Error saving company transaction data:", response.data.error); // Use response.data.error
+        console.log(
+          "Error saving company transaction data:",
+          response.data.error
+        ); // Use response.data.error
         toast.error(response.data.message);
         return false;
       } else {
@@ -75,12 +85,35 @@ const CompanyAccount = () => {
       }
 
       // Fetch updated company data
+
       fetchCompanyAccountData();
     } catch (error) {
       console.error("Error saving company data:", error);
       toast.error("Error saving company data");
     }
   };
+
+//  ---------------------- Search ---------------------- //
+
+  const filteredCompanyAccountData = companyAccountData.filter((company) => {
+    return (
+      company.company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      company.transaction_type.toString().includes(searchQuery) ||
+      company.transaction_amt.toString().includes(searchQuery) ||
+      company.transaction_date.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      company.payment_mode.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
+
+ //  ---------------------- Pagination ---------------------- //
+
+  const itemsPerPage = 5;
+  const {
+    currentPage,
+    currentData: currentAccountData,
+    totalPages,
+    handlePageChange,
+  } = usePagination(filteredCompanyAccountData, itemsPerPage);
 
   return (
     <div className="container-fluid p-0">
@@ -190,11 +223,23 @@ const CompanyAccount = () => {
               <h3 className="card-title">All Company Account Transactions</h3>
             </div>
             <div className="card-body">
+              <div className="row mb-2">
+                <div className="col-sm-12 ml-2">
+                  <input
+                    type="search"
+                    className="form-control form-control-sm"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search company transactions.."
+                  />
+                </div>
+              </div>
+              
               <div className="table-responsive">
                 <table className="table table-striped table-hover">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      {/* <th>ID</th> */}
                       <th>Company Name</th>
                       <th>Company ID</th>
                       <th>Transaction Type</th>
@@ -205,42 +250,56 @@ const CompanyAccount = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {companyAccountData.map((companyaccount, index) => (
-                      <tr key={index}>
-                        <td>{companyaccount.id}</td>
-                        <td>{companyaccount.company.name}</td>
-                        <td>{companyaccount.company.id}</td>
-                        <td
-                          className={
-                            companyaccount.transaction_type == 1
-                              ? "text-danger"
-                              : "text-success"
-                          }
-                        >
-                          {companyaccount.transaction_type == 1
-                            ? "Debit"
-                            : "Credit"}
-                        </td>
-                        <td
-                          className={
-                            companyaccount.transaction_type == 1
-                              ? "text-danger"
-                              : "text-success"
-                          }
-                        >
-                          {companyaccount.transaction_type == 1
-                            ? `-${companyaccount.transaction_amt}`
-                            : `+${companyaccount.transaction_amt}`}
-                        </td>
-                        <td>{companyaccount.transaction_date}</td>
-                        <td>{companyaccount.payment_mode}</td>
-                        <td>
-                          {new Date(companyaccount.added_on).toLocaleString()}
+                    {/* Display Company Account Data */}
+                    {currentAccountData.length > 0 ? (
+                      currentAccountData.map((companyaccount, index) => (
+                        <tr key={index}>
+                          {/* <td>{companyaccount.id}</td> */}
+                          <td>{companyaccount.company.name}</td>
+                          <td>{companyaccount.company.id}</td>
+                          <td
+                            className={
+                              companyaccount.transaction_type == 1
+                                ? "text-danger"
+                                : "text-success"
+                            }
+                          >
+                            {companyaccount.transaction_type == 1
+                              ? "Debit"
+                              : "Credit"}
+                          </td>
+                          <td
+                            className={
+                              companyaccount.transaction_type == 1
+                                ? "text-danger"
+                                : "text-success"
+                            }
+                          >
+                            {companyaccount.transaction_type == 1
+                              ? `-${companyaccount.transaction_amt}`
+                              : `+${companyaccount.transaction_amt}`}
+                          </td>
+                          <td>{companyaccount.transaction_date}</td>
+                          <td>{companyaccount.payment_mode}</td>
+                          <td>
+                            {new Date(companyaccount.added_on).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="9" className="text-center">
+                          No record found
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </div>
             </div>
           </div>

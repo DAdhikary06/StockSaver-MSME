@@ -325,7 +325,7 @@ const EmployeeDetails = () => {
                 <table className="table table-striped table-hover">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      {/* <th>ID</th> */}
                       <th>Account No.</th>
                       <th>IFSC Code</th>
                       <th>Added On</th>
@@ -334,7 +334,7 @@ const EmployeeDetails = () => {
                   <tbody>
                     {employeeBankList.map((bank) => (
                       <tr key={bank.id}>
-                        <td>{bank.id}</td>
+                        {/* <td>{bank.id}</td> */}
                         <td>{bank.bank_account_no}</td>
                         <td>{bank.ifsc_no}</td>
                         <td>{new Date(bank.added_on).toLocaleString()}</td>
@@ -402,7 +402,7 @@ const EmployeeDetails = () => {
                 <table className="table table-striped table-hover">
                   <thead>
                     <tr>
-                      <th>#ID</th>
+                      {/* <th>#ID</th> */}
                       <th>Salary Date</th>
                       <th>Salary Amount</th>
                       <th>Added On</th>
@@ -411,7 +411,7 @@ const EmployeeDetails = () => {
                   <tbody>
                     {employeeSalaryList.map((salary) => (
                       <tr key={salary.id}>
-                        <td>{salary.id}</td>
+                        {/* <td>{salary.id}</td> */}
                         <td>{salary.salary_date}</td>
                         <td className="text-success">{`+${salary.salary_amount}`}</td>
                         <td>{new Date(salary.added_on).toLocaleString()}</td>

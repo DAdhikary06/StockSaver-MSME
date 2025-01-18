@@ -3,10 +3,14 @@ import AuthHandler from "../utils/Authhandler";
 import APIHandler from "../utils/APIHandler";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../utils/Pagination";
+import usePagination from "../Hooks/usePagination";
 
 const Employee = () => {
   const navigate = useNavigate();
   const apiHandler = APIHandler();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [employeeList, setEmployeeList] = useState([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -14,9 +18,6 @@ const Employee = () => {
     phone: "",
     address: "",
   });
-
-  const [employeeList, setEmployeeList] = useState([]);
-
 
   useEffect(() => {
     AuthHandler.checkTokenExpiry();
@@ -36,7 +37,6 @@ const Employee = () => {
   const ShowEmpDetails = (eid) => {
     navigate(`/employeeDetails/${eid}`);
   };
-    
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,10 +66,10 @@ const Employee = () => {
         toast.success(response.data.message);
         // Reset form fields
         setFormData({
-            name: "",
-            joining_date: "",
-            phone: "",
-            address: "",
+          name: "",
+          joining_date: "",
+          phone: "",
+          address: "",
         });
       }
 
@@ -80,6 +80,23 @@ const Employee = () => {
       toast.error("Error saving company data");
     }
   };
+
+  const filteredEmp = employeeList.filter((emp) => {
+    return searchQuery === ""
+      ? emp
+      : emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          emp.phone.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          emp.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          emp.joining_date.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+  const itemsPerPage = 5;
+  const {
+    currentPage,
+    currentData: currentEmpData,
+    totalPages,
+    handlePageChange,
+  } = usePagination(filteredEmp, itemsPerPage);
 
   return (
     <div className="container-fluid p-0">
@@ -169,11 +186,22 @@ const Employee = () => {
               <h3 className="card-title">All Employee Details</h3>
             </div>
             <div className="card-body">
+              <div className="row mb-2">
+                <div className="col-sm-12 ml-2">
+                  <input
+                    type="search"
+                    className="form-control form-control-sm"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search employees..."
+                  />
+                </div>
+              </div>
               <div className="table-responsive">
                 <table className="table table-striped table-hover">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      {/* <th>ID</th> */}
                       <th>Name</th>
                       <th>Joining Date</th>
                       <th>Phone</th>
@@ -183,22 +211,42 @@ const Employee = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {employeeList.map((employee) => (
-                      <tr key={employee.id}>
-                        <td>{employee.id}</td>
-                        <td>{employee.name}</td>
-                        <td>{employee.joining_date}</td>
-                        <td>{employee.phone}</td>
-                        <td>{employee.address}</td>
-                        <td>{new Date(employee.added_on).toLocaleString()}</td>
-                        <td>
-                          <button className="btn btn-primary" onClick={()=>ShowEmpDetails(employee.id)}>Edit</button>
+                    {currentEmpData.length > 0 ? (
+                      currentEmpData.map((employee) => (
+                        <tr key={employee.id}>
+                          {/* <td>{employee.id}</td> */}
+                          <td>{employee.name}</td>
+                          <td>{employee.joining_date}</td>
+                          <td>{employee.phone}</td>
+                          <td>{employee.address}</td>
+                          <td>
+                            {new Date(employee.added_on).toLocaleString()}
+                          </td>
+                          <td>
+                            <button
+                              className="btn btn-primary"
+                              onClick={() => ShowEmpDetails(employee.id)}
+                            >
+                              Edit
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="7" className="text-center">
+                          No data found
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
             </div>
           </div>
         </div>

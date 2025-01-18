@@ -3,11 +3,15 @@ import { useEffect, useState } from "react";
 import AuthHandler from "../utils/Authhandler";
 import APIHandler from "../utils/APIHandler";
 import { toast } from "react-hot-toast";
+import Pagination from "../utils/Pagination";
+import usePagination from "../Hooks/usePagination";
 // import { useNavigate } from "react-router-dom";
 
 const CustomerRequest = () => {
+
   const apiHandler = APIHandler();
   // const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -93,6 +97,24 @@ const CustomerRequest = () => {
     }
   };
 
+  const filteredCustReq = customerRequestList.filter((cust) => {
+    return searchQuery === ""
+      ? cust
+      : cust.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          cust.phone.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          cust.medicine_details.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+
+  const itemsPerPage = 5
+  const {
+    currentPage,
+    currentData: currentCustReqData,
+    totalPages,
+    handlePageChange,
+  } = usePagination(filteredCustReq, itemsPerPage);
+
+
   return (
     <div className="container-fluid p-0">
       <div className="row mb-2 mb-xl-3">
@@ -166,11 +188,22 @@ const CustomerRequest = () => {
               <h3 className="card-title">All Customer Medicine Details</h3>
             </div>
             <div className="card-body">
+            <div className="row mb-2">
+                <div className="col-sm-12 ml-2">
+                  <input
+                    type="search"
+                    className="form-control form-control-sm"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search company transactions.."
+                  />
+                </div>
+              </div>
               <div className="table-responsive">
                 <table className="table table-striped table-hover">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      {/* <th>ID</th> */}
                       <th>Name</th>
                       <th>Phone No.</th>
                       <th>Medicine Details</th>
@@ -180,9 +213,10 @@ const CustomerRequest = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {customerRequestList.map((customer) => (
+                    {currentCustReqData.length > 0 ? (
+                    currentCustReqData.map((customer) => (
                       <tr key={customer.id}>
-                        <td>{customer.id}</td>
+                        {/* <td>{customer.id}</td> */}
                         <td >{customer.customer_name}</td>
                         <td>{customer.phone}</td>
                         <td>{customer.medicine_details}</td>
@@ -218,10 +252,22 @@ const CustomerRequest = () => {
                           )}
                         </td>
                       </tr>
-                    ))}
+                    )))
+                    : (
+                      <tr>
+                        <td colSpan="7" className="text-center">
+                          No employee data found
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
             </div>
           </div>
         </div>

@@ -3,6 +3,8 @@ import AuthHandler from "../utils/Authhandler";
 import APIHandler from "../utils/APIHandler";
 import { toast } from "react-hot-toast";
 import { useParams } from "react-router-dom";
+import Pagination from "../utils/Pagination";
+import usePagination from "../Hooks/usePagination";
 
 const MedicineManage = () => {
   const { id } = useParams();
@@ -10,10 +12,10 @@ const MedicineManage = () => {
   const [companylist, setCompanyList] = useState([]);
   const [medicineDataList, setMedicineDataList] = useState([]);
   const [total_salt_list, setTotalSaltList] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
   const [medicinedetails, setMedicineDetails] = useState([
     { salt_name: "", salt_qty: "", salt_qty_type: "", description: "" },
   ]);
-
 
   const [formData, setFormData] = useState({
     name: "",
@@ -170,6 +172,27 @@ const MedicineManage = () => {
     }
   };
 
+  const filterMedicineData = medicineDataList.filter((item) => {
+    return searchQuery !== ""
+      ? item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.medical_typ.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.batch_no.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.shelf_no.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.expire_date.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.mfg_date.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.in_stock_total.toString().includes(searchQuery.toLowerCase()) ||
+          item.company.name.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+  });
+
+  const itemsPerPage = 5;
+  const {
+    currentData: currentMedicineDataList,
+    currentPage,
+    totalPages,
+    handlePageChange,
+  } = usePagination(filterMedicineData, itemsPerPage);
+
   return (
     <div className="container-fluid p-0">
       <div className="row mb-2 mb-xl-3">
@@ -181,13 +204,24 @@ const MedicineManage = () => {
             <div className="card-header">
               <h3 className="card-title">All Medicine List</h3>
             </div>
-            <div className="m-1">
+            <div className="m-2">
+              <div className="row">
+                <div className="col-sm-12 ml-2">
+                  <input
+                    type="text"
+                    className="form-control form-control-sm"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search Medicines..."
+                  />
+                </div>
+              </div>
               <div className="table-responsive">
                 <table className="table table-striped table-hover">
                   <thead>
                     <tr>
-                      <th>#ID</th>
-                      <th>NAME</th>
+                      {/* <th>#ID</th> */}
+                      <th>Name</th>
                       <th>Medical Type</th>
                       <th>Buy Price</th>
                       <th>Sell Price</th>
@@ -202,33 +236,48 @@ const MedicineManage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {medicineDataList.map((medicine, index) => (
-                      <tr key={medicine.id}>
-                        <td>{medicine.id}</td>
-                        <td>{medicine.name}</td>
-                        <td>{medicine.medical_typ}</td>
-                        <td>{medicine.buy_price}</td>
-                        <td>{medicine.sell_price}</td>
-                        <td>{medicine.batch_no}</td>
-                        <td>{medicine.shelf_no}</td>
-                        <td>{medicine.expire_date}</td>
-                        <td>{medicine.mfg_date}</td>
-                        <td>{medicine.in_stock_total}</td>
-                        <td>{medicine.company.name}</td>
-                        <td>{new Date(medicine.added_on).toLocaleString()}</td>
-                        <td>
-                          <button
-                            className="btn btn-outline-primary"
-                            onClick={() => viewMedicineDetails(index)}
-                          >
-                            View
-                          </button>
+                    {currentMedicineDataList.length > 0 ? (
+                      currentMedicineDataList.map((medicine, index) => (
+                        <tr key={medicine.id}>
+                          {/* <td>{medicine.id}</td> */}
+                          <td>{medicine.name}</td>
+                          <td>{medicine.medical_typ}</td>
+                          <td>{medicine.buy_price}</td>
+                          <td>{medicine.sell_price}</td>
+                          <td>{medicine.batch_no}</td>
+                          <td>{medicine.shelf_no}</td>
+                          <td>{medicine.expire_date}</td>
+                          <td>{medicine.mfg_date}</td>
+                          <td>{medicine.in_stock_total}</td>
+                          <td>{medicine.company.name}</td>
+                          <td>
+                            {new Date(medicine.added_on).toLocaleString()}
+                          </td>
+                          <td>
+                            <button
+                              className="btn btn-outline-primary"
+                              onClick={() => viewMedicineDetails(index)}
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="13" className="text-center">
+                          No Data Found
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
             </div>
           </div>
         </div>
@@ -252,7 +301,6 @@ const MedicineManage = () => {
                       placeholder="Enter your name"
                       value={formData.name}
                       onChange={handleChange}
-                      
                     />
                   </div>
                   <div className="mb-3 col-md-6">

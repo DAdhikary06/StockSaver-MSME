@@ -3,10 +3,14 @@ import AuthHandler from "../utils/Authhandler";
 import APIHandler from "../utils/APIHandler";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import TruncateText from "../utils/TruncateText";
+import Pagination from "../utils/Pagination";
+import usePagination from "../Hooks/usePagination";
+
 const Company = () => {
-  
   const apiHandler = APIHandler();
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -15,7 +19,6 @@ const Company = () => {
     contact_no: "",
     email: "",
     description: "",
-
   });
 
   const [companyData, setCompanyData] = useState([]);
@@ -29,6 +32,8 @@ const Company = () => {
       console.error("Error fetching company data:", error);
     }
   };
+
+//  ---------------------- View company Details ---------------------- //
 
   const viewCompanyDetails = (company_id) => {
     console.log("Viewing company details for company ID:", company_id);
@@ -71,7 +76,6 @@ const Company = () => {
         contact_no: "",
         email: "",
         description: "",
-    
       });
       // Fetch updated company data
       fetchCompanyData();
@@ -80,6 +84,24 @@ const Company = () => {
       toast.error("Error saving company data");
     }
   };
+  /* Filter the company data based on the search query*/
+  const filteredCompanyData = companyData.filter((company) =>
+    searchQuery === ""
+      ? true
+      : company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        company.license_no.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        company.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        company.contact_no.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        company.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const itemsPerPage = 2;
+  const {
+    currentPage,
+    currentData: currentCompanyData,
+    totalPages,
+    handlePageChange,
+  } = usePagination(filteredCompanyData, itemsPerPage);
 
   return (
     <div className="container-fluid p-0">
@@ -198,11 +220,22 @@ const Company = () => {
               <h3 className="card-title">Company List</h3>
             </div>
             <div className="m-2">
+              <div className="row">
+                <div className="col-sm-12 ml-2">
+                  <input
+                    type="search"
+                    className="form-control form-control-sm"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search companies..."
+                  />
+                </div>
+              </div>
               <div className="table-responsive">
                 <table className="table table-striped table-hover">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      {/* <th>ID</th> */}
                       <th>Name</th>
                       <th>License No.</th>
                       <th>Address</th>
@@ -212,30 +245,48 @@ const Company = () => {
                       <th>Added On</th>
                       <th>Actions</th>
                     </tr>
-                  </thead>
+                  </thead> 
                   <tbody>
-                    {companyData.map((company, index) => (
-                      <tr key={index}>
-                        <td>{company.id}</td>
-                        <td>{company.name}</td>
-                        <td>{company.license_no}</td>
-                        <td>{company.address}</td>
-                        <td>{company.contact_no}</td>
-                        <td>{company.email}</td>
-                        <td>{company.description}</td>
-                        <td>{new Date(company.added_on).toLocaleString()}</td>
-                        <td>
-                          <button
-                            className="btn btn-outline-info"
-                            onClick={() => viewCompanyDetails(company.id)}
-                          >
-                            View
-                          </button>
+                    {currentCompanyData.length > 0 ? (
+                      currentCompanyData.map((company, index) => (
+                        <tr key={index}>
+                          {/* <td>{company.id}</td> */}
+                          <td>{company.name}</td>
+                          <td>{company.license_no}</td>
+                          <td>{company.address}</td>
+                          <td>{company.contact_no}</td>
+                          <td>{company.email}</td>
+                          <td>
+                            <TruncateText
+                              text={company.description}
+                              maxLength={5}
+                            />
+                          </td>
+                          <td>{new Date(company.added_on).toLocaleString()}</td>
+                          <td>
+                            <button
+                              className="btn btn-outline-info"
+                              onClick={() => viewCompanyDetails(company.id)}
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="9" className="text-center">
+                          No companies found
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </div>
             </div>
           </div>
