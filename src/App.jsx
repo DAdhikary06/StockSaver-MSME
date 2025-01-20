@@ -23,7 +23,7 @@ import MedicineManage from './pages/MedicineManage';
 import BillGenerate from './pages/BillGenerate';
 import ForgotPassword from './pages/ForgotPassword';
 import SetNewPassword from './pages/SetNewPassword';
-
+import Error404 from './pages/Error404';
 
 function App() {
   return (
@@ -47,8 +47,9 @@ function App() {
         <Route path="/employeeDetails/:id" element={<PrivateRouteNew page={EmployeeDetails} additionalProp="value" />} />
         <Route path="/generateBill" element={<PrivateRouteNew page={BillGenerate} additionalProp="value" />} />
         <Route path="/customerRequest" element={<PrivateRouteNew page={CustomerRequest} additionalProp="value" />} />
+        <Route path="*" element={<Error404 />} />
       </Routes>
-    </Router>
+    </Router> 
   );
 }
 

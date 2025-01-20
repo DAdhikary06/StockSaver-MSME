@@ -475,6 +475,57 @@ const APIHandler = () => {
     return response;
   }
 
+  const createPaymentIntent = async (data) => {
+    await checkLogin();
+    try {
+      const response = await axios.post(
+        `http://127.0.0.1:8000/create-payment-intent/`,
+        {
+          amount: data.amount,
+          company_id: data.company_id,
+          currency: data.currency,
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + AuthHandler.getLoginToken(),
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.data || !response.data.clientSecret) {
+        throw new Error('Invalid response from server');
+      }
+
+      console.log(response)
+      
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Failed to create payment intent');
+    }
+  }
+
+  const handlePaymentSuccess = async (paymentData) => {
+    await checkLogin()
+    try {
+      const response = await axios.post(
+        `http://127.0.0.1:8000/handle-payment-success/`,
+        paymentData,
+        {
+          headers: {
+            Authorization: "Bearer " + AuthHandler.getLoginToken(),
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log(response)
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Failed to process payment"
+      );
+    }
+  };
+
   return {
     checkLogin,
     fetchAllCompany,
@@ -507,6 +558,9 @@ const APIHandler = () => {
     editMedicineData,
 
     generateBill,
+
+    createPaymentIntent,
+    handlePaymentSuccess,
   };
 };
 

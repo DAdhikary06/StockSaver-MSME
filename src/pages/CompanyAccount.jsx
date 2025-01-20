@@ -5,6 +5,89 @@ import APIHandler from "../utils/APIHandler";
 import { toast } from "react-hot-toast";
 import Pagination from "../utils/Pagination";
 import usePagination from "../Hooks/usePagination";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, CardElement } from '@stripe/react-stripe-js';
+import { useStripe, useElements } from '@stripe/react-stripe-js';
+
+
+const stripePromise = loadStripe("pk_test_51QiiAPJKxBLf3nf78m8x5jLkWY6cG8inIqvXD1EFxkEcSBo8lW7oUGEBmgPm7LkS0EerzszPCx2xl1JpiUkXYx6M00EAJjJ6Mx");
+
+const CheckoutForm = ({ clientSecret, onSuccess, amount, companyId }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Function to get the company name from companyData by companyId
+  // const getCompanyName = (companyId) => {
+  //   const selectedCompany = companyData.find(company => company.id === companyId);
+  //   console.log('Company data:', companyData);
+  //   console.log('Selected company:', selectedCompany.name);
+  //   return selectedCompany ? selectedCompany.name : 'Company Account Payment'; // Default name if not found
+  // };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+    setLoading(true);
+    setError(null);
+
+    try {
+      // const companyName = getCompanyName(companyId); // Dynamically get company name
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+          billing_details: {
+            name: 'Test User' // Set the dynamic company name in billing details
+          },
+        },
+      });
+      if (error) {
+        setError(error.message);
+        toast.error(error.message);
+      } else {
+        await onSuccess(paymentIntent);
+      }
+    } catch (err) {
+      setError('Payment failed. Please try again.');
+      toast.error('Payment failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="payment-form">
+      <CardElement
+        options={{
+          style: {
+            base: {
+              fontSize: '16px',
+              color: '#424770',
+              '::placeholder': {
+                color: '#aab7c4',
+              },
+            },
+            invalid: {
+              color: '#9e2146',
+            },
+          },
+        }}
+      />
+      <button
+        type="submit"
+        disabled={!stripe || loading}
+        className="pay-button"
+      >
+        {loading ? 'Processing...' : `Pay ₹${amount}`}
+      </button>
+      {error && <div className="error-message">{error}</div>}
+    </form>
+  );
+};
 
 const CompanyAccount = () => {
 
@@ -13,14 +96,15 @@ const CompanyAccount = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
     company_id: "",
-    transaction_type: "",
+    // transaction_type: "",
     transaction_amt: "",
-    transaction_date: "",
-    payment_mode: "",
+    // transaction_date: "",
+    // payment_mode: "",
   });
 
   const [companyAccountData, setCompanyAccountData] = useState([]);
   const [companyList, setCompanyData] = useState([]);
+  const [clientSecret, setClientSecret] = useState("");
 
 //---------------------- Fetch Company Account Data ----------------------//
 
@@ -31,6 +115,7 @@ const CompanyAccount = () => {
 
   const fetchCompanyAccountData = async () => {
     const companyData = await apiHandler.fetchCompanyOnly();
+    console.log("Company Data", companyData.data);
     setCompanyData(companyData.data);
     updateDataAgain();
   };
@@ -39,59 +124,100 @@ const CompanyAccount = () => {
 
   const updateDataAgain = async () => {
     const companyAccountData = await apiHandler.fetchAllCompanyAccount();
-    // console.log("Company Account Data", companyAccountData.data.data);
+    console.log("Company Account Data", companyAccountData.data.data);
     setCompanyAccountData(companyAccountData.data.data);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(name, value);
     setFormData({
       ...formData,
       [name]: value,
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handlePayment = async (e) => {
     e.preventDefault();
+
+    if (!formData.transaction_amt || !formData.company_id) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+
     try {
-      const response = await apiHandler.saveCompanyTransactionData(
-        formData.company_id,
-        formData.transaction_type,
-        formData.transaction_amt,
-        formData.transaction_date,
-        formData.payment_mode
-      );
-      console.log("Company Account Transaction", response.data);
-
-      // Check for error in the response
-      if (response.data.error) {
-        console.log(
-          "Error saving company transaction data:",
-          response.data.error
-        ); // Use response.data.error
-        toast.error(response.data.message);
-        return false;
+      const amountInPaise = Math.round(formData.transaction_amt * 100);
+      
+      const response = await apiHandler.createPaymentIntent({
+        amount: amountInPaise,
+        company_id: formData.company_id,
+        currency: 'inr'
+      });
+      if (response.clientSecret) {
+        setClientSecret(response.clientSecret);
       } else {
-        toast.success(response.data.message);
-        // Reset form fields
-        setFormData({
-          company_id: "",
-          transaction_type: "",
-          transaction_amt: "",
-          transaction_date: "",
-          payment_mode: "",
-        });
+        throw new Error('No client secret received');
       }
-
-      // Fetch updated company data
-
-      fetchCompanyAccountData();
     } catch (error) {
-      console.error("Error saving company data:", error);
-      toast.error("Error saving company data");
+      toast.error(error.message || 'Failed to initialize payment');
     }
   };
+
+  const handlePaymentSuccess = async (paymentIntent) => {
+    try {
+      await apiHandler.handlePaymentSuccess({
+        paymentIntentId: paymentIntent.id,
+        companyId: formData.company_id,
+        amount: formData.transaction_amt
+      });
+
+      toast.success("Payment successful!");
+      setClientSecret(null);
+      updateDataAgain();
+    } catch (error) {
+      toast.error("Error processing payment");
+    }
+  };
+
+
+
+    // try {
+    //   const response = await apiHandler.saveCompanyTransactionData(
+    //     formData.company_id,
+    //     formData.transaction_type,
+    //     formData.transaction_amt,
+    //     formData.transaction_date,
+    //     formData.payment_mode
+    //   );
+    //   console.log("Company Account Transaction", response.data);
+
+    //   // Check for error in the response
+    //   if (response.data.error) {
+    //     console.log(
+    //       "Error saving company transaction data:",
+    //       response.data.error
+    //     ); // Use response.data.error
+    //     toast.error(response.data.message);
+    //     return false;
+    //   } else {
+    //     toast.success(response.data.message);
+    //     // Reset form fields
+    //     setFormData({
+    //       company_id: "",
+    //       transaction_type: "",
+    //       transaction_amt: "",
+    //       transaction_date: "",
+    //       payment_mode: "",
+    //     });
+    //   }
+
+    //   // Fetch updated company data
+
+    //   fetchCompanyAccountData();
+    // } catch (error) {
+    //   console.error("Error saving company data:", error);
+    //   toast.error("Error saving company data");
+    // }
+
 
 //  ---------------------- Search ---------------------- //
 
@@ -127,7 +253,7 @@ const CompanyAccount = () => {
               <h3 className="card-title">Add Company Account Bill </h3>
             </div>
             <div className="card-body">
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handlePayment}>
                 <div className="row">
                   <div className="mb-3 col-md-6">
                     <label className="form-label" htmlFor="company">
@@ -148,7 +274,7 @@ const CompanyAccount = () => {
                       ))}
                     </select>
                   </div>
-                  <div className="mb-3 col-md-6">
+                  {/* <div className="mb-3 col-md-6">
                     <label className="form-label" htmlFor="transaction_type">
                       Transaction Type
                     </label>
@@ -163,10 +289,10 @@ const CompanyAccount = () => {
                       <option value="1">Debit</option>
                       <option value="2">Credit</option>
                     </select>
-                  </div>
+                  </div> */}
                   <div className="mb-3 col-md-6">
                     <label className="form-label" htmlFor="amount">
-                      Amount
+                      Amount(INR)
                     </label>
                     <input
                       type="text"
@@ -179,7 +305,7 @@ const CompanyAccount = () => {
                       required
                     />
                   </div>
-                  <div className="mb-3 col-md-6">
+                  {/* <div className="mb-3 col-md-6">
                     <label className="form-label" htmlFor="transaction_date">
                       Transaction Date
                     </label>
@@ -208,12 +334,22 @@ const CompanyAccount = () => {
                       onChange={handleChange}
                       required
                     />
-                  </div>
+                  </div> */}
                 </div>
                 <button type="submit" className="btn btn-primary">
-                  Add Company Transaction
+                  Add Company Payment
                 </button>
               </form>
+              {clientSecret && (
+                <Elements stripe={stripePromise}>
+                  <CheckoutForm
+                    clientSecret={clientSecret}
+                    onSuccess={handlePaymentSuccess}
+                    amount={formData.transaction_amt}
+                    companyId={formData.company_id}
+                  />
+                </Elements>
+              )}
             </div>
           </div>
         </div>

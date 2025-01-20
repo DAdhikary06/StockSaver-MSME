@@ -32,6 +32,19 @@ const BillGenerate = () => {
   });
 
   useEffect(() => {
+    generateBillId();
+  }, []);
+  
+  const generateBillId = () => {
+    const timestamp = new Date().getTime();
+    const randomNum = Math.floor(Math.random() * 1000);
+    const newBillId = `BILL${timestamp}${randomNum}`;
+    setFormData(prevData => ({
+      ...prevData,
+      bill_id: newBillId
+    }));
+  };
+  useEffect(() => {
     // Check if user is logged in
     AuthHandler.checkTokenExpiry();
     fetchMedicineStock();

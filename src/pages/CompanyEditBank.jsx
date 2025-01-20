@@ -120,4 +120,3 @@ const CompanyEditBank = () => {
 };
 
 export default CompanyEditBank;
-``

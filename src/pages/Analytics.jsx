@@ -319,7 +319,7 @@ const Analytics = ({ setLowStockMedicines }) => {
                       </div>
                     </div>
                   </div>
-                  <h1 className="mt-1 mb-3">₹ {sell_total}</h1>
+                  <h1  className="mt-1 mb-3">₹ {sell_total}</h1>
                 </div>
               </div>
             </div>
