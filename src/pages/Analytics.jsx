@@ -29,63 +29,118 @@ const Analytics = ({ setLowStockMedicines }) => {
     fetchMedicineStock();
   }, []);
 
-  const [profitChartOptions, setProfitChartOptions] = useState({
-    chart: {
-      type: "bar",
-    },
-    xaxis: {
-      type: "datetime",
-      labels: {
-        formatter: function (value) {
-          return new Date(value).toLocaleDateString(); // Format the date for display
-        },
-      },
-    },
-    yaxis: {
-      categories: [
-        {
-          name: "Profit",
-          data: [],
-        },
-        {
-          name: "Sales",
-          data: [],
-        },
-        {
-          name: "Buy",
-          data: [],
-        },
-      ],
-      title: {
-        text: "₹ (Rupees)",
-      },
-    },
-    stroke: {
-      show: true,
-      width: 2,
-      colors: ["transparent"],
-    },
-    plotOptions: {
-      bar: {
-        columnWidth: "30%",
-        endingShape: "rounded",
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    title: {
-      text: "Total Profit, Sales & Buy Chart",
-      align: "center",
-    },
-  });
+  // const [profitChartOptions, setProfitChartOptions] = useState({
+  //   chart: {
+  //     type: "bar",
+  //   },
+  //   xaxis: {
+  //     type: "datetime",
+  //     labels: {
+  //       formatter: function (value) {
+  //         return new Date(value).toLocaleDateString(); // Format the date for display
+  //       },
+  //     },
+  //   },
+  //   yaxis: {
+  //     categories: [
+  //       {
+  //         name: "Profit",
+  //         data: [],
+  //       },
+  //       {
+  //         name: "Sales",
+  //         data: [],
+  //       },
+  //       {
+  //         name: "Buy",
+  //         data: [],
+  //       },
+  //     ],
+  //     title: {
+  //       text: "₹ (Rupees)",
+  //     },
+  //   },
+  //   stroke: {
+  //     show: true,
+  //     width: 2,
+  //     colors: ["transparent"],
+  //   },
+  //   plotOptions: {
+  //     bar: {
+  //       columnWidth: "30%",
+  //       endingShape: "rounded",
+  //     },
+  //   },
+  //   dataLabels: {
+  //     enabled: false,
+  //   },
+  //   title: {
+  //     text: "Total Profit, Sales & Buy Chart",
+  //     align: "center",
+  //   },
+  // });
 
-  const [profitSeries, setProfitSeries] = useState([
-    {
-      name: "Date",
-      data: [], // this will hold Date values
+  // const [profitSeries, setProfitSeries] = useState([
+  //   {
+  //     name: "Date",
+  //     data: [], // this will hold Date values
+  //   },
+  // ]);
+
+const [profitChartOptions, setProfitChartOptions] = useState({
+  chart: {
+    type: "area", // Set to area chart
+    stacked: false, // Stack the areas (set to true if you want them stacked)
+  },
+  xaxis: {
+    type: "datetime", // Use datetime for the x-axis
+    labels: {
+      formatter: function (value) {
+        return new Date(value).toLocaleDateString();
+      },
     },
-  ]);
+  },
+  yaxis: {
+    title: {
+      text: "₹ (Rupees)",
+    },
+  },
+  fill: {
+    type: "gradient", // Use gradient fill for all areas
+  },
+  stroke: {
+    show: true,
+    width: 2,
+    curve: "smooth", // Smooth curve for each area
+  },
+  title: {
+    text: "Profit, Sales & Buy Combined Area Chart",
+    align: "center",
+  },
+  legend: {
+    position: "top", // Display legend at the top
+  },
+});
+
+
+const [profitSeries, setProfitSeries] = useState([
+  {
+    name: "Profit", // Profit series
+    data: [/* Your profit data here */], // Replace with actual profit data
+    color: "#FF5733", // Set a distinct color for Profit
+  },
+  {
+    name: "Sales", // Sales series
+    data: [/* Your sales data here */], // Replace with actual sales data
+    color: "#33FF57", // Set a distinct color for Sales
+  },
+  {
+    name: "Buy", // Buy series
+    data: [/* Your buy data here */], // Replace with actual buy data
+    color: "#3357FF", // Set a distinct color for Buy
+  },
+]);
+
 
   const redirectCustomerRequest = () => {
     navigate("/customerRequest");
@@ -419,7 +474,7 @@ const Analytics = ({ setLowStockMedicines }) => {
           <Chart
             options={profitChartOptions}
             series={profitSeries}
-            type="bar"
+            type="area"
             height={350}
           />
         </div>
