@@ -76,7 +76,6 @@ const AuthHandler = {
     const jwt = JSON.parse(atob(tokenArray[1])); // Parse the payload from the token
     const expire = jwt?.exp ? jwt.exp * 1000 : false; // Convert seconds to milliseconds
     const isExpired = expire ? Date.now() > expire : false; // Check if token is expired
-    
     return isExpired;
   },
 };

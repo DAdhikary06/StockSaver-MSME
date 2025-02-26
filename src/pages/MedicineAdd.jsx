@@ -138,7 +138,7 @@ const MedicineAdd = () => {
                 <div className="row">
                   <div className="mb-3 col-md-6">
                     <label className="form-label" htmlFor="name">
-                      Name
+                      Medicine Name
                     </label>
                     <input
                       type="text"

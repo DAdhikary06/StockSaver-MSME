@@ -8,7 +8,6 @@ import Spinner from "../utils/Spinner";
 
 const Register = () => {
   const navigate = useNavigate();
-  const [state, setState] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     first_name: "",
