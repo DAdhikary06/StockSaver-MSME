@@ -217,7 +217,7 @@ With **StockSaver**, admins can easily manage store operations, from inventory t
 
 ## 🙏 Contributing
 
-We welcome contributions to Cinemax! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.
+We welcome contributions to StockSaver! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.
 
 ### Steps to Contribute:
 
