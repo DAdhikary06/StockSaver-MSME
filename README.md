@@ -25,9 +25,9 @@
 We are grateful for the contributions of the following individuals who helped make StockSaver a reality:
 
 - 👤 [Deep Adhikary](https://github.com/DAdhikary06)
-- 👤 [Chandrasekhar Roy](https://github.com/nil-official)
-- 👤 [Amrapali Chakraborty](https://github.com/axon04) 
-- 👤 [Prasam Kundu](https://github.com/axon04) 
+- 👤 [Chandrasekhar Roy](https://github.com/chandraSekharRoy001)
+- 👤 [Amrapali Chakraborty](https://github.com/amrapali2002)
+- 👤 [Prasam Kundu](https://github.com/PrasamK02) 
 
 ## 📝Table of Contents
 
