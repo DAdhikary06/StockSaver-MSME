@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/ApexCharts-FF8F00?style=for-the-badge&logo=apexcharts&logoColor=white" alt="ApexCharts">
 </p>
 
-## 📺Preview
+## 📺 Preview
 
 <p align="center">
   <img src="./Screenshots/Dashbord.png" width="700" alt="StockSaver Preview">
@@ -29,7 +29,7 @@ We are grateful for the contributions of the following individuals who helped ma
 - 👤 [Amrapali Chakraborty](https://github.com/amrapali2002)
 - 👤 [Prasam Kundu](https://github.com/PrasamK02) 
 
-## 📝Table of Contents
+## 📝 Table of Contents
 
 - [Introduction](#introduction)
 - [Features](#features)
@@ -39,10 +39,10 @@ We are grateful for the contributions of the following individuals who helped ma
 - [Contributing](#contributing)
 - [License](#license)
 
-## 😊Introduction
+## 😊 Introduction
 StockSaver is a Medical Stock Management System designed to streamline and automate the operations of medical stores. It helps store owners efficiently manage inventory, sales, and customer information. The system also supports secure payments through Stripe and provides real-time data visualization for sales and stock levels using ApexCharts.
 
-## 🤩Features
+## 🤩 Features
 - **Automated Stock Management**: Tracks inventory levels and alerts users when stock is low.
 - **Admin Dashboard**: Provides a real-time overview of sales, stock levels, and customer orders.
 - **Customer Billing**: Allows admins to generate bills for customers, listing the purchased items and total amounts.
@@ -51,7 +51,7 @@ StockSaver is a Medical Stock Management System designed to streamline and autom
 - **JWT Authentication**: Secure authentication system with role-based access.
 - **Responsive UI**: User-friendly interface built with React.js.
 
-## 🤯Technologies Used
+## 🤯 Technologies Used
 - **Backend**: Django, Django Rest Framework (DRF)
 - **Frontend**: React.js
 - **Database**: SQLite3
@@ -59,7 +59,7 @@ StockSaver is a Medical Stock Management System designed to streamline and autom
 - **Payment Gateway**: Stripe
 - **Charts**: ApexCharts
 
-## 🤖Frontend Setup 
+## 🤖 Frontend Setup 
 
 ### Installation
 
@@ -100,7 +100,7 @@ Before setting up the frontend, make sure you have the following installed:
 The application will be available at `http://localhost:5173`.
 
 
-## ⚙️Backend Setup
+## ⚙️ Backend Setup
 
 ### Repository Link
 
@@ -153,7 +153,7 @@ Before setting up the backend, ensure you have the following installed:
   ```
 The backend will be available at http://localhost:8000.
 
-## 😱Usage
+## 😱 Usage
 
 Once the system is running, admins can:
 
@@ -215,7 +215,7 @@ Once the system is running, admins can:
 With **StockSaver**, admins can easily manage store operations, from inventory to customer orders, payments, and reporting.
 
 
-## 🙏Contributing
+## 🙏 Contributing
 
 We welcome contributions to Cinemax! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.
 
@@ -245,7 +245,7 @@ We welcome contributions to Cinemax! If you have any ideas, suggestions, or bug 
 
 6. **Open a pull request**
 
-## 📃License
+## 📃 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
