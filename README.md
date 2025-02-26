@@ -16,7 +16,8 @@
 ## 📺Preview
 
 <p align="center">
-  <img src="../Screenshots/Dashboard.png" width="700" alt="StockSaver Preview">
+  <img src="./Screenshots/Dashbord.png" width="700" alt="StockSaver Preview">
+  <img src="./Screenshots/Graphical_Representation.png" width="700" alt="StockSaver Preview">
 </p>
 
 ## 🫂 Contributors
